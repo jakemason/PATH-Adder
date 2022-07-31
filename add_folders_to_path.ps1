@@ -60,12 +60,24 @@ if(!$commit){
   Write-Host "===================================================================================================================================" -ForegroundColor Yellow
 } 
 else {
+  $addedOutputTable = @()
+  $successString = "Successfully added to PATH."
   $updatedPath = $oldPath
   Foreach($folder in $folders){
     if(!($oldPath -Match [RegEx]::Escape($folder.FullName))){
       $updatedPath += ";$($folder.FullName)"
+      $entry = [PSCustomObject]@{
+        Path = $folder.FullName
+        Status = $successString
+      }
+      $addedOutputTable += $entry
     } 
   }
+
+  Write-Host "==================================================================================================================================="
+  Write-Host "The following folders were added to your PATH:";
+  Write-Host "==================================================================================================================================="
+  $addedOutputTable | Format-Table -AutoSize | Format-Color @{$successString = 'Green'}
 
   [Environment]::SetEnvironmentVariable("PATH", $updatedPath, [EnvironmentVariableTarget]::User)
   $newPath = [Environment]::GetEnvironmentVariable('PATH', 'User');
@@ -76,7 +88,7 @@ else {
 
   Write-Host ""
   Write-Host "===================================================================================================================================" -ForegroundColor Yellow
-  Write-Host "Your previous path was written to 'old_path.txt' as a precaution. Delete this file if it is not needed for a restoration." -ForegroundColor Yellow
+  Write-Host "Your previous PATH was written to 'old_path.txt' as a precaution. Delete this file if it is not needed for a restoration." -ForegroundColor Yellow
   Write-Host "===================================================================================================================================" -ForegroundColor Yellow
   $oldPath | Out-File .\old_path.txt
 
